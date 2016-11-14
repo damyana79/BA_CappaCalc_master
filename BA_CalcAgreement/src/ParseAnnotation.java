@@ -184,10 +184,13 @@ public class ParseAnnotation {
         return temp.contains("telic") && temp.contains("atelic");
     }
 
+    //TODO: remove hard coding
     public static String getRawTextname(String documentName,
-                                        String xmlFolderName, String textFolderName) {
+                                        String xmlFolderName, String projectName, String textFolderName) {
+
+        System.out.println(documentName + " " + xmlFolderName + " " + textFolderName);
         String rawName = documentName.replace(xmlFolderName + "\\"
-                + "NewSEAspectTelicity_", "");
+                + projectName, "");
         int underscore = rawName.lastIndexOf("_");
         rawName = rawName.substring(0, underscore);
 
@@ -208,14 +211,20 @@ public class ParseAnnotation {
 
     public static void main(String[] args) throws DocumentException,
             IOException {
-        String textFolderName = "raw_textfiles";
+        //String projectName = "NewSEAspectTelicity_";
+        //String textFolderName ="raw_textfiles";
+        String projectName = "Evaluation_AspectTelicity_";
+        String textFolderName = "Evaluation_raw_texts";
 
         //ENTER INPUT AND OUTPUT FILENAMES
         //TODO: hardcoded is ugly
-        String outputDocPathName = "outputDifferences_all\\all3_alltexts.txt";
-        String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
+//        String outputDocPathName = "outputDifferences_all\\all3_alltexts.txt";
+//        String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
+//        String xmlAnnotFolder = "all_texts_all_annotators";
 
-        String xmlAnnotFolder = "all_texts_all_annotators";
+        String outputDocPathName = "evaluation_output/test1.txt";
+        String outputDocPathName_telicity = "evaluation_telicity/test2.txt";
+        String xmlAnnotFolder = "Evaluation_AT_all";
 
         //CONDUCT STUDY
         Map<String, List<String>> allDocs = groupDocs(xmlAnnotFolder);
@@ -249,7 +258,7 @@ public class ParseAnnotation {
             if (difference.isEmpty())
                 continue;
             String document = difference.get(0).get(0).document;
-            String rawDocPathName = getRawTextname(document, xmlAnnotFolder,
+            String rawDocPathName = getRawTextname(document, xmlAnnotFolder, projectName,
                     textFolderName);
             lookupLabels(difference, rawDocPathName, outputDocPathName);
 

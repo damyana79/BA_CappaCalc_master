@@ -1,11 +1,11 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.FleissKappaAgreement;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.visualization.CoincidenceMatrixPrinter;
+
+import static de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy.countAnnotationsPerCategory;
+import static de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy.countTotalAnnotationsPerCategory;
 
 public class AgreementForAnnotations {
 
@@ -109,12 +109,10 @@ public class AgreementForAnnotations {
     }
 
 
-
     private double getObservedAndExpectedAgreement(CodingAnnotationStudy study) {
         FleissKappaAgreement agreement = new FleissKappaAgreement(study);
         return agreement.calculateAgreement();
     }
-
 
 
     public List<List<List<Annotation>>> getDifferences() {
@@ -145,17 +143,29 @@ public class AgreementForAnnotations {
         System.out.println("Target type coincidence matrix: ");
         new CoincidenceMatrixPrinter().print(System.out,
                 this.targetTypeAgreement);
+        System.out.println("total number items " + this.targetTypeAgreement.getItemCount());
+        System.out.println("Situation Entity: " + Arrays.toString(countAnnotationsPerCategory(this.targetTypeAgreement).get("Situation Entity")));
+        System.out.println("None: " + Arrays.toString(countAnnotationsPerCategory(this.targetTypeAgreement).get("None")));
+        System.out.println("total target type distribution " + countTotalAnnotationsPerCategory(this.targetTypeAgreement));
         System.out.println();
         System.out.println("Aspectual class coincidence matrix: ");
         new CoincidenceMatrixPrinter()
                 .print(System.out, this.aspectClAgreement);
+        System.out.println("dynamic: " + Arrays.toString(countAnnotationsPerCategory(this.aspectClAgreement).get("dynamic")));
+        System.out.println("stative: " + Arrays.toString(countAnnotationsPerCategory(this.aspectClAgreement).get("stative")));
+        System.out.println("total aspect class distribution: " + countTotalAnnotationsPerCategory(this.aspectClAgreement));
         System.out.println();
         System.out.println("Telicity coincidence matrix: ");
         new CoincidenceMatrixPrinter()
                 .print(System.out, this.telicityAgreement);
         System.out.println();
         System.out.println("telicity items " + this.telicityAgreement.getItemCount());
+        System.out.println("telic: rater distribution " + Arrays.toString(countAnnotationsPerCategory(this.telicityAgreement).get("telic")));
+        System.out.println("atelic: rater distribution " + Arrays.toString(countAnnotationsPerCategory(this.telicityAgreement).get("atelic")));
+        //System.out.println("raters " + Arrays.toString(countAnnotationsPerCategory(this.telicityAgreement.extractRaters(0)).get("atelic")));
+        System.out.println("total telicity distribution " + countTotalAnnotationsPerCategory(this.telicityAgreement));
     }
+
 
     // /////////// ALTER CODE ////////////////////////////////////////////
 
