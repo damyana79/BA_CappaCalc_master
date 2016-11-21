@@ -96,28 +96,32 @@ public class AgreementForAnnotations {
             this.telicityAgreement.addItem(telicityAnnotations.toArray());
         }
     }
-//TODO:
-    public static void readIntercorpVerbAspect(String filename){
+
+    //TODO:
+    public static List<String> readIntercorpVerbAspect(String filename) {
+        List<String> intercorpAspect = new ArrayList<>();
         Path path = Paths.get(filename);
-        try(BufferedReader bufferedReader = Files.newBufferedReader(path);
-        CSVReader reader = new CSVReader(bufferedReader)){
+        try (BufferedReader bufferedReader = Files.newBufferedReader(path);
+             CSVReader reader = new CSVReader(bufferedReader)) {
             String[] nextLine;
             while ((nextLine = reader.readNext()) != null) {
                 String verb = nextLine[0];
                 String aspect = nextLine[1].trim();
                 String aspectValue = "";
-                if (aspect.equals("pf")){
+                if (aspect.equals("pf")) {
                     aspectValue = "telic";
                 } else {
                     aspectValue = "atelic";
                 }
-                System.out.println(verb + "\n" + aspectValue);
+                //System.out.println(verb + "\n" + aspectValue);
+                intercorpAspect.add(aspectValue);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        //System.out.println(intercorpAspect);
+        return intercorpAspect;
     }
 
 
@@ -134,7 +138,7 @@ public class AgreementForAnnotations {
     }
 
 
-//    private FleissKappaAgreement getFleissKappaAgreement(CodingAnnotationStudy study) {
+    //    private FleissKappaAgreement getFleissKappaAgreement(CodingAnnotationStudy study) {
 //        FleissKappaAgreement agreement = new FleissKappaAgreement(study);
 //        //return agreement.calculateAgreement();
 //        return  agreement;
@@ -142,18 +146,21 @@ public class AgreementForAnnotations {
     private double getFleissKappaAgreementValue(FleissKappaAgreement agreement) {
         return agreement.calculateAgreement();
     }
+
     private double getObservedAgreement(FleissKappaAgreement agreement) {
         return agreement.calculateObservedAgreement();
     }
+
     private double getExpectedAgreement(FleissKappaAgreement agreement) {
         return agreement.calculateExpectedAgreement();
     }
+
     private double[] getAllAgreementMeasures(CodingAnnotationStudy study) {
         FleissKappaAgreement agreement = new FleissKappaAgreement(study);
         double fk = getFleissKappaAgreementValue(agreement);
         double observed = getObservedAgreement(agreement);
         double expected = getExpectedAgreement(agreement);
-        return new double[] {fk, observed, expected};
+        return new double[]{fk, observed, expected};
     }
 
 
@@ -224,7 +231,7 @@ public class AgreementForAnnotations {
     // annotations.stream().distinct().limit(2).count();
     // // return uniqueValues > 1;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         String fileIntercorpVerbs = "intercorpVerbAspect/verbKeyAspect.csv";
         readIntercorpVerbAspect(fileIntercorpVerbs);
 
