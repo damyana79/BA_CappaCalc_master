@@ -22,7 +22,7 @@ public class ParseAnnotation {
     /**
      * @param documentName
      * @param annotationFiles
-     * @return output: AL[HM<spanId:AnnotationObject >] per document; input
+     * @return output: AL[HM <spanId:AnnotationObject>] per document; input
      * provided durch iterieren über groupdocs(String folderpath)
      * @throws IOException
      * @throws DocumentException
@@ -39,8 +39,7 @@ public class ParseAnnotation {
 
     /**
      * @param filename
-     * @return output: for each annotated file HashMap <id,
-     * Annotation(attributes I need)>
+     * @return output: for each annotated file HashMap <id, Annotation(attributes I need)>
      * @throws DocumentException
      * @throws IOException
      */
@@ -86,8 +85,11 @@ public class ParseAnnotation {
      * @return output: all files in HashMap:(full)filename:[corresponding
      * annotated files]
      */
+    //TODO: ?input: nicht folderpath, sonsern liste aus files, die schon vorkombiniert wurden in einer anderen methode
     public static Map<String, List<String>> groupDocs(String folderpath) {
         Map<String, List<String>> groupDoc = new HashMap<String, List<String>>();
+        //TODO: den teil des codes, das mir alle files gibt in einer anderen methode auslagern;
+        // die kombiantionen/diese methode hier so lange aufrufen, bis die kombinationsliste leer ist
         File folder = new File(folderpath);
         File[] listOfFiles = folder.listFiles();
         if (listOfFiles == null) {
@@ -131,8 +133,7 @@ public class ParseAnnotation {
 
     /**
      * @param disagreementProDoc
-     * @return collects different annotations in HashMap <Integer,
-     * ArrayList<Annotation>> disagreementProDoc
+     * @return collects different annotations in HashMap <Integer,ArrayList<Annotation>> disagreementProDoc
      */
     public static void lookupLabels(List<List<Annotation>> disagreementProDoc,
                                     String rawDocPathName, String outputFilePathName) {
@@ -188,7 +189,7 @@ public class ParseAnnotation {
     public static String getRawTextname(String documentName,
                                         String xmlFolderName, String projectName, String textFolderName) {
 
-        System.out.println(documentName + " " + xmlFolderName + " " + textFolderName);
+        //System.out.println(documentName + " " + xmlFolderName + " " + textFolderName);
         String rawName = documentName.replace(xmlFolderName + "\\"
                 + projectName, "");
         int underscore = rawName.lastIndexOf("_");
@@ -222,8 +223,8 @@ public class ParseAnnotation {
 //        String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
 //        String xmlAnnotFolder = "all_texts_all_annotators";
 
-        String outputDocPathName = "evaluation_output/test1.txt";
-        String outputDocPathName_telicity = "evaluation_telicity/test2.txt";
+        String outputDocPathName = "evaluation_outputDifferences/test1.txt";
+        String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/test2.txt";
         String xmlAnnotFolder = "Evaluation_AT_all";
 
         //CONDUCT STUDY

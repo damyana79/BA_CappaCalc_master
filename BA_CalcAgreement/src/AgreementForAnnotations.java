@@ -1,5 +1,11 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
+import com.opencsv.CSVReader;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.FleissKappaAgreement;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.visualization.CoincidenceMatrixPrinter;
@@ -90,28 +96,64 @@ public class AgreementForAnnotations {
             this.telicityAgreement.addItem(telicityAnnotations.toArray());
         }
     }
+//TODO:
+    public static void readIntercorpVerbAspect(String filename){
+        Path path = Paths.get(filename);
+        try(BufferedReader bufferedReader = Files.newBufferedReader(path);
+        CSVReader reader = new CSVReader(bufferedReader)){
+            String[] nextLine;
+            while ((nextLine = reader.readNext()) != null) {
+                String verb = nextLine[0];
+                String aspect = nextLine[1].trim();
+                String aspectValue = "";
+                if (aspect.equals("pf")){
+                    aspectValue = "telic";
+                } else {
+                    aspectValue = "atelic";
+                }
+                System.out.println(verb + "\n" + aspectValue);
+            }
 
-    public double getTargetTypeAgreement() {
-        return getFleissKappaAgreement(this.targetTypeAgreement);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public double getAspectClAgreement() {
-        return getFleissKappaAgreement(this.aspectClAgreement);
+
+    public double[] getTargetTypeAgreement() {
+        return getAllAgreementMeasures(this.targetTypeAgreement);
     }
 
-    public double getTelicityAgreement() {
-        return getFleissKappaAgreement(this.telicityAgreement);
+    public double[] getAspectClAgreement() {
+        return getAllAgreementMeasures(this.aspectClAgreement);
     }
 
-    private double getFleissKappaAgreement(CodingAnnotationStudy study) {
-        FleissKappaAgreement agreement = new FleissKappaAgreement(study);
+    public double[] getTelicityAgreement() {
+        return getAllAgreementMeasures(this.telicityAgreement);
+    }
+
+
+//    private FleissKappaAgreement getFleissKappaAgreement(CodingAnnotationStudy study) {
+//        FleissKappaAgreement agreement = new FleissKappaAgreement(study);
+//        //return agreement.calculateAgreement();
+//        return  agreement;
+//    }
+    private double getFleissKappaAgreementValue(FleissKappaAgreement agreement) {
         return agreement.calculateAgreement();
     }
-
-
-    private double getObservedAndExpectedAgreement(CodingAnnotationStudy study) {
+    private double getObservedAgreement(FleissKappaAgreement agreement) {
+        return agreement.calculateObservedAgreement();
+    }
+    private double getExpectedAgreement(FleissKappaAgreement agreement) {
+        return agreement.calculateExpectedAgreement();
+    }
+    private double[] getAllAgreementMeasures(CodingAnnotationStudy study) {
         FleissKappaAgreement agreement = new FleissKappaAgreement(study);
-        return agreement.calculateAgreement();
+        double fk = getFleissKappaAgreementValue(agreement);
+        double observed = getObservedAgreement(agreement);
+        double expected = getExpectedAgreement(agreement);
+        return new double[] {fk, observed, expected};
     }
 
 
@@ -128,15 +170,20 @@ public class AgreementForAnnotations {
         return annotations.stream().distinct().limit(2).count() <= 1;
     }
 
+    public String printStudyAgreement(double[] agreementValues) {
+        return new String("Fleiss K agreement: " + String.valueOf(agreementValues[0]) + "\n"
+                + "Observed Agreement: " + String.valueOf(agreementValues[1]) + "\n"
+                + "Expected Agreement: " + String.valueOf(agreementValues[2]) + "\n");
+    }
+
     @Override
     public String toString() {
-        String agreement = new String("Target type agreement: "
-                + String.valueOf(this.getTargetTypeAgreement()) + "\n"
-                + "Aspectual class agreement: "
-                + String.valueOf(this.getAspectClAgreement()) + "\n"
-                + "Telicity agreement: "
-                + String.valueOf(this.getTelicityAgreement()) + "\n");
-        return agreement;
+        return new String("Target type agreement: " + "\n"
+                + printStudyAgreement(this.getTargetTypeAgreement()) + "\n"
+                + "Aspectual class agreement: " + "\n"
+                + printStudyAgreement(this.getAspectClAgreement()) + "\n"
+                + "Telicity agreement: " + "\n"
+                + printStudyAgreement(this.getTelicityAgreement()) + "\n");
     }
 
     public void printCoincidenceMatrix() {
@@ -148,6 +195,7 @@ public class AgreementForAnnotations {
         System.out.println("None: " + Arrays.toString(countAnnotationsPerCategory(this.targetTypeAgreement).get("None")));
         System.out.println("total target type distribution " + countTotalAnnotationsPerCategory(this.targetTypeAgreement));
         System.out.println();
+
         System.out.println("Aspectual class coincidence matrix: ");
         new CoincidenceMatrixPrinter()
                 .print(System.out, this.aspectClAgreement);
@@ -155,6 +203,7 @@ public class AgreementForAnnotations {
         System.out.println("stative: " + Arrays.toString(countAnnotationsPerCategory(this.aspectClAgreement).get("stative")));
         System.out.println("total aspect class distribution: " + countTotalAnnotationsPerCategory(this.aspectClAgreement));
         System.out.println();
+
         System.out.println("Telicity coincidence matrix: ");
         new CoincidenceMatrixPrinter()
                 .print(System.out, this.telicityAgreement);
@@ -174,5 +223,11 @@ public class AgreementForAnnotations {
     // // long uniqueValues =
     // annotations.stream().distinct().limit(2).count();
     // // return uniqueValues > 1;
+
+    public static void main(String[] args){
+        String fileIntercorpVerbs = "intercorpVerbAspect/verbKeyAspect.csv";
+        readIntercorpVerbAspect(fileIntercorpVerbs);
+
+    }
 
 }

@@ -1,11 +1,23 @@
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * Container class for an annotation
+ */
 public class Annotation {
 	int begin, end;
 	String document;
 	String targetType, aspClass, telicity;
 
+	/**
+	 *
+	 * @param begin
+	 * @param end
+	 * @param document
+	 * @param targetType
+	 * @param aspClass
+	 * @param telicity
+	 */
 	Annotation(int begin, int end, String document, String targetType,
 			String aspClass, String telicity) {
 		this.begin = begin;
