@@ -19,11 +19,21 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 public class ParseAnnotation {
+
+    String project;
+    String documentName;
+
+    public ParseAnnotation(){
+
+    }
+
+
+
     /**
      * @param documentName
      * @param annotationFiles
      * @return output: AL[HM <spanId:AnnotationObject>] per document; input
-     * provided durch iterieren über groupdocs(String folderpath)
+     * provided through iteration over groupdocs(String folderpath)
      * @throws IOException
      * @throws DocumentException
      */
@@ -212,20 +222,27 @@ public class ParseAnnotation {
 
     public static void main(String[] args) throws DocumentException,
             IOException {
-        //String projectName = "NewSEAspectTelicity_";
-        //String textFolderName ="raw_textfiles";
+        //TODO: to run the code on the other dataset, switch the commented and the uncommented filenames
+        //#1a
+//        String projectName = "NewSEAspectTelicity_";
+//        String textFolderName = "raw_textfiles";
+
+        //#1b
         String projectName = "Evaluation_AspectTelicity_";
         String textFolderName = "Evaluation_raw_texts";
 
         //ENTER INPUT AND OUTPUT FILENAMES
-        //TODO: hardcoded is ugly
+        //#2a
 //        String outputDocPathName = "outputDifferences_all\\all3_alltexts.txt";
 //        String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
-//        String xmlAnnotFolder = "all_texts_all_annotators";
+        //String xmlAnnotFolder = "annotations_alltexts_Melissa_ich";
 
-        String outputDocPathName = "evaluation_outputDifferences/test1.txt";
-        String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/test2.txt";
+        //#2b
+        String outputDocPathName = "evaluation_outputDifferences/E1_all.txt";
+        String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/E1_all.txt";
+//        String xmlAnnotFolder = "Evaluation_AT_Melissa_ich";
         String xmlAnnotFolder = "Evaluation_AT_all";
+
 
         //CONDUCT STUDY
         Map<String, List<String>> allDocs = groupDocs(xmlAnnotFolder);

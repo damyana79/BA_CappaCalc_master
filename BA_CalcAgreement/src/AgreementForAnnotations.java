@@ -9,6 +9,7 @@ import com.opencsv.CSVReader;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.FleissKappaAgreement;
 import de.tudarmstadt.ukp.dkpro.statistics.agreement.visualization.CoincidenceMatrixPrinter;
+import de.tudarmstadt.ukp.dkpro.statistics.agreement.visualization.ContingencyMatrixPrinter;
 
 import static de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy.countAnnotationsPerCategory;
 import static de.tudarmstadt.ukp.dkpro.statistics.agreement.coding.CodingAnnotationStudy.countTotalAnnotationsPerCategory;
@@ -20,8 +21,8 @@ public class AgreementForAnnotations {
     private final CodingAnnotationStudy aspectClAgreement;
     private final CodingAnnotationStudy telicityAgreement;
 
-    private List<List<List<Annotation>>> differences;
-    //private List<List<List<Annotation>>> telicityDifferences;
+    private List<List<List<Annotation>>> differences; // differing annotations
+    private List<List<List<Annotation>>> goldStandard; // same annotations; interesting for silver standard
 
     public AgreementForAnnotations(int numberAnnotators) {
         this.numberAnnotators = numberAnnotators;
@@ -32,7 +33,8 @@ public class AgreementForAnnotations {
         this.telicityAgreement = new CodingAnnotationStudy(
                 this.numberAnnotators);
 
-        this.differences = new ArrayList<List<List<Annotation>>>();
+        this.differences = new ArrayList<>();
+        this.goldStandard = new ArrayList<>();
 
     }
 
@@ -46,6 +48,7 @@ public class AgreementForAnnotations {
     public void addDocument(String documentName,
                             ArrayList<HashMap<Integer, Annotation>> parsedAnnotations) {
         List<List<Annotation>> differencesProDocument = new ArrayList<List<Annotation>>();
+        List<List<Annotation>> goldProDocument = new ArrayList<List<Annotation>>();
         Set<Integer> span_id_keys = parsedAnnotations.get(0).keySet();
         for (Integer span_id_key : span_id_keys) {
             ArrayList<Annotation> annotObjectsList = new ArrayList<Annotation>();
@@ -55,13 +58,16 @@ public class AgreementForAnnotations {
                 annotObjectsList.add(annotObject);
             }
             addElement(annotObjectsList);
+            //checking if all annotators have marked the item with same label
             if (!hasOnlyEqualObjects(annotObjectsList)) {
                 differencesProDocument.add(annotObjectsList);
                 // System.out.println(annotObjectsList);
-
+            } else {
+                goldProDocument.add(annotObjectsList);
             }
         }
         this.differences.add(differencesProDocument);
+        this.goldStandard.add(goldProDocument);
     }
 
     private void addElement(List<Annotation> annotObjectsList) {
@@ -74,6 +80,7 @@ public class AgreementForAnnotations {
         List<String> targetTypeAnnotations = new ArrayList<String>();
         List<String> aspClassAnnotations = new ArrayList<String>();
         List<String> telicityAnnotations = new ArrayList<String>();
+        //add annotation objects for all fields
         for (Annotation annotObject : annotObjectsList) {
             // targetType
             String targetTypeAnnot = annotObject.targetType;
@@ -95,33 +102,6 @@ public class AgreementForAnnotations {
         if (!telicityAnnotations.contains(null)) {
             this.telicityAgreement.addItem(telicityAnnotations.toArray());
         }
-    }
-
-    //TODO:
-    public static List<String> readIntercorpVerbAspect(String filename) {
-        List<String> intercorpAspect = new ArrayList<>();
-        Path path = Paths.get(filename);
-        try (BufferedReader bufferedReader = Files.newBufferedReader(path);
-             CSVReader reader = new CSVReader(bufferedReader)) {
-            String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                String verb = nextLine[0];
-                String aspect = nextLine[1].trim();
-                String aspectValue = "";
-                if (aspect.equals("pf")) {
-                    aspectValue = "telic";
-                } else {
-                    aspectValue = "atelic";
-                }
-                //System.out.println(verb + "\n" + aspectValue);
-                intercorpAspect.add(aspectValue);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //System.out.println(intercorpAspect);
-        return intercorpAspect;
     }
 
 
@@ -166,6 +146,9 @@ public class AgreementForAnnotations {
 
     public List<List<List<Annotation>>> getDifferences() {
         return differences;
+    }
+    public List<List<List<Annotation>>> getGoldStandard() {
+        return goldStandard;
     }
 
     /**
@@ -231,10 +214,10 @@ public class AgreementForAnnotations {
     // annotations.stream().distinct().limit(2).count();
     // // return uniqueValues > 1;
 
-    public static void main(String[] args) {
-        String fileIntercorpVerbs = "intercorpVerbAspect/verbKeyAspect.csv";
-        readIntercorpVerbAspect(fileIntercorpVerbs);
-
-    }
+//    public static void main(String[] args) {
+//        String fileIntercorpVerbs = "intercorpVerbAspect/verbKeyAspect.csv";
+//        readIntercorpVerbAspect(fileIntercorpVerbs);
+//
+//    }
 
 }
