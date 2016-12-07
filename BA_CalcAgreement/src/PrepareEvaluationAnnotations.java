@@ -10,9 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class SplitEvaluationAnnotators {
-
+public class PrepareEvaluationAnnotations {
 
     //TODO: viel besser möglich
     public static void getSingleAnnotators(String input, String file1, String file2, String file3) {
@@ -43,7 +43,7 @@ public class SplitEvaluationAnnotators {
                 }
             }
             writeSingleAnnotators(file1, annotator1);
-            writeSingleAnnotators(file2,annotator2);
+            writeSingleAnnotators(file2, annotator2);
             writeSingleAnnotators(file3, annotator3);
 
         } catch (IOException ex) {
@@ -52,11 +52,12 @@ public class SplitEvaluationAnnotators {
     }
 
     public static void writeSingleAnnotators(String input, ArrayList<String[]> annotations) {
+        emptyFile(input);
         Path path = Paths.get(input);
         try (BufferedWriter buf = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
                 StandardOpenOption.APPEND, StandardOpenOption.WRITE);
              CSVWriter writer = new CSVWriter(buf)) {
-            for (String[] annotation: annotations){
+            for (String[] annotation : annotations) {
                 writer.writeNext(annotation);
             }
 
@@ -68,7 +69,17 @@ public class SplitEvaluationAnnotators {
 
     }
 
-    public static void  main(String[] args){
+    public static void emptyFile(String filename) {
+        try {
+            Files.deleteIfExists(Paths.get(filename));
+        } catch (IOException e) {
+            System.err.println("Cannot access " + filename);
+            System.err.println(e);
+            return;
+        }
+    }
+
+    public static void main(String[] args) {
         String fileAll = "EvaluationVerbs/evaluationAnnotationVerbs.csv";
         String annotator1 = "EvaluationVerbs/annotator1.csv";
         String annotator2 = "EvaluationVerbs/annotator2.csv";

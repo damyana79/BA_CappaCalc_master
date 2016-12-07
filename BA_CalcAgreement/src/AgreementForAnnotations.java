@@ -22,7 +22,8 @@ public class AgreementForAnnotations {
     private final CodingAnnotationStudy telicityAgreement;
 
     private List<List<List<Annotation>>> differences; // differing annotations
-    private List<List<List<Annotation>>> goldStandard; // same annotations; interesting for silver standard
+    private List<List<List<Annotation>>> sameAnnotations; // same annotations; interesting for silver standard
+    private List<List<List<Annotation>>> allAnnotations;
 
     public AgreementForAnnotations(int numberAnnotators) {
         this.numberAnnotators = numberAnnotators;
@@ -33,8 +34,10 @@ public class AgreementForAnnotations {
         this.telicityAgreement = new CodingAnnotationStudy(
                 this.numberAnnotators);
 
+        //TODO: all three redundant, reduce and modify
         this.differences = new ArrayList<>();
-        this.goldStandard = new ArrayList<>();
+        this.sameAnnotations = new ArrayList<>();
+        this.allAnnotations = new ArrayList<>();
 
     }
 
@@ -49,6 +52,8 @@ public class AgreementForAnnotations {
                             ArrayList<HashMap<Integer, Annotation>> parsedAnnotations) {
         List<List<Annotation>> differencesProDocument = new ArrayList<List<Annotation>>();
         List<List<Annotation>> goldProDocument = new ArrayList<List<Annotation>>();
+        List<List<Annotation>> all = new ArrayList<List<Annotation>>();
+
         Set<Integer> span_id_keys = parsedAnnotations.get(0).keySet();
         for (Integer span_id_key : span_id_keys) {
             ArrayList<Annotation> annotObjectsList = new ArrayList<Annotation>();
@@ -58,6 +63,7 @@ public class AgreementForAnnotations {
                 annotObjectsList.add(annotObject);
             }
             addElement(annotObjectsList);
+
             //checking if all annotators have marked the item with same label
             if (!hasOnlyEqualObjects(annotObjectsList)) {
                 differencesProDocument.add(annotObjectsList);
@@ -65,9 +71,11 @@ public class AgreementForAnnotations {
             } else {
                 goldProDocument.add(annotObjectsList);
             }
+            all.add(annotObjectsList);
         }
         this.differences.add(differencesProDocument);
-        this.goldStandard.add(goldProDocument);
+        this.sameAnnotations.add(goldProDocument);
+        this.allAnnotations.add(all);
     }
 
     private void addElement(List<Annotation> annotObjectsList) {
@@ -147,8 +155,11 @@ public class AgreementForAnnotations {
     public List<List<List<Annotation>>> getDifferences() {
         return differences;
     }
-    public List<List<List<Annotation>>> getGoldStandard() {
-        return goldStandard;
+    public List<List<List<Annotation>>> getSameAnnotations() {
+        return sameAnnotations;
+    }
+    public List<List<List<Annotation>>> getAllAnnotations() {
+        return allAnnotations;
     }
 
     /**
@@ -189,6 +200,7 @@ public class AgreementForAnnotations {
         System.out.println("Aspectual class coincidence matrix: ");
         new CoincidenceMatrixPrinter()
                 .print(System.out, this.aspectClAgreement);
+        System.out.println("aspect items " + this.aspectClAgreement.getItemCount());
         System.out.println("dynamic: " + Arrays.toString(countAnnotationsPerCategory(this.aspectClAgreement).get("dynamic")));
         System.out.println("stative: " + Arrays.toString(countAnnotationsPerCategory(this.aspectClAgreement).get("stative")));
         System.out.println("total aspect class distribution: " + countTotalAnnotationsPerCategory(this.aspectClAgreement));

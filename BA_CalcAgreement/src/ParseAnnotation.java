@@ -6,13 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.opencsv.CSVWriter;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -20,13 +18,16 @@ import org.dom4j.io.SAXReader;
 
 public class ParseAnnotation {
 
-    String project;
-    String documentName;
+    String projectName;
+    String xmlFolderName;
+    String textDocPathName;
 
-    public ParseAnnotation(){
 
+    public ParseAnnotation(String projectName, String xmlAnnotationsFolder, String rawDocPathName) {
+        this.projectName = projectName;
+        this.xmlFolderName = xmlAnnotationsFolder;
+        this.textDocPathName = rawDocPathName;
     }
-
 
 
     /**
@@ -91,16 +92,18 @@ public class ParseAnnotation {
     }
 
     /**
-     * @param folderpath
+     * //@param folderpath
+     *
      * @return output: all files in HashMap:(full)filename:[corresponding
      * annotated files]
      */
     //TODO: ?input: nicht folderpath, sonsern liste aus files, die schon vorkombiniert wurden in einer anderen methode
-    public static Map<String, List<String>> groupDocs(String folderpath) {
+    //public static Map<String, List<String>> groupDocs(String folderpath)
+    public Map<String, List<String>> groupDocs() {
         Map<String, List<String>> groupDoc = new HashMap<String, List<String>>();
         //TODO: den teil des codes, das mir alle files gibt in einer anderen methode auslagern;
         // die kombiantionen/diese methode hier so lange aufrufen, bis die kombinationsliste leer ist
-        File folder = new File(folderpath);
+        File folder = new File(this.xmlFolderName);
         File[] listOfFiles = folder.listFiles();
         if (listOfFiles == null) {
             System.err.println("This directory doesn't exist");
@@ -145,16 +148,15 @@ public class ParseAnnotation {
      * @param disagreementProDoc
      * @return collects different annotations in HashMap <Integer,ArrayList<Annotation>> disagreementProDoc
      */
-    public static void lookupLabels(List<List<Annotation>> disagreementProDoc,
-                                    String rawDocPathName, String outputFilePathName) {
+    public void lookupLabels(List<List<Annotation>> disagreementProDoc, String rawDocPathname, String outputFilePathName) {
         // Set<String> docName = disagreementList.get(0).keySet();
 
         String text;
         try {
-            text = new String(Files.readAllBytes(Paths.get(rawDocPathName)),
+            text = new String(Files.readAllBytes(Paths.get(rawDocPathname)),
                     "UTF-8");
         } catch (IOException e) {
-            System.err.println("Error reading file " + rawDocPathName);
+            System.err.println("Error reading file " + rawDocPathname);
             return;
         }
 
@@ -189,6 +191,80 @@ public class ParseAnnotation {
         }
     }
 
+    public void lookupEvaluationVerbs(List<List<Annotation>> annotationList, String rawDocPathname, String outputFilePathName, String outputDynamic) {
+        String text;
+        try {
+            text = new String(Files.readAllBytes(Paths.get(rawDocPathname)),
+                    "UTF-8");
+        } catch (IOException e) {
+            System.err.println("Error reading file " + rawDocPathname);
+            return;
+        }
+        for (List<Annotation> annotations : annotationList) {
+            // String docName = annotations.get(0).document;
+            int begin = annotations.get(0).begin;
+            int end = annotations.get(0).end;
+            String verb = text.substring(begin, end);
+
+            Path path = Paths.get(outputFilePathName);
+            Path path_2 = Paths.get(outputDynamic);
+            try (BufferedWriter bw = Files.newBufferedWriter(path,
+                    StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND, StandardOpenOption.WRITE);
+                 BufferedWriter bw_2 = Files.newBufferedWriter(path_2,
+                         StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+                         StandardOpenOption.APPEND, StandardOpenOption.WRITE);
+                 CSVWriter writer = new CSVWriter(bw);
+                 CSVWriter writer_2 = new CSVWriter(bw_2)) {
+
+
+                List<String> aspectualClassLabels = new ArrayList<>();
+                //aspectualClassLabels.add(verb);
+                List<String> telicityLabels = new ArrayList<>();
+
+                List<String> dynamicOnly = new ArrayList<>();
+
+                for (Annotation annotation : annotations) {
+                    if (annotation.aspClass == null) {
+                        annotation.aspClass = "dummy_a";
+                    }
+                    aspectualClassLabels.add(annotation.aspClass);
+
+                    if ("stative".equals(annotation.aspClass)) {
+                        telicityLabels.add("X_atelic");
+                    } else {
+                        if (annotation.telicity == null) {
+                            annotation.telicity = "dummy_t";
+                        }
+                        telicityLabels.add(annotation.telicity);
+                    }
+                }
+                if (checkOnlyDynamic(aspectualClassLabels)) {
+                    List<String> temporal = new ArrayList<>(Arrays.asList(verb));
+                    temporal.addAll(telicityLabels);
+                    String[] dynamic = temporal.stream().toArray(String[]::new);
+                    writer_2.writeNext(dynamic);
+                }
+                List<String> temp = new ArrayList<>(Arrays.asList(verb));
+                temp.addAll(aspectualClassLabels);
+                List<String> newList = Stream.concat(temp.stream(), telicityLabels.stream()).collect(Collectors.toList());
+                String[] verbdata = newList.stream().toArray(String[]::new);
+                writer.writeNext(verbdata);
+
+            } catch (IOException e) {
+                System.err.println("Error writing file " + path);
+                // System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean checkOnlyDynamic(List<String> aspectList) {
+        HashSet<String> checker = new HashSet<>(aspectList);
+        return (checker.size() == 1 && checker.contains("dynamic"));
+    }
+
+
     public static boolean telicityDifference(List<Annotation> difference) {
         List<String> temp = difference.stream().map(annotation -> annotation == null ? null : annotation.telicity)
                 .collect(Collectors.toList());
@@ -196,16 +272,15 @@ public class ParseAnnotation {
     }
 
     //TODO: remove hard coding
-    public static String getRawTextname(String documentName,
-                                        String xmlFolderName, String projectName, String textFolderName) {
+    public String getRawTextname(String documentName) {
 
         //System.out.println(documentName + " " + xmlFolderName + " " + textFolderName);
-        String rawName = documentName.replace(xmlFolderName + "\\"
-                + projectName, "");
+        String rawName = documentName.replace(this.xmlFolderName + "\\"
+                + this.projectName, "");
         int underscore = rawName.lastIndexOf("_");
         rawName = rawName.substring(0, underscore);
 
-        String rawDocPathName = textFolderName + "\\" + rawName + ".txt";
+        String rawDocPathName = this.textDocPathName + "\\" + rawName + ".txt";
         // System.out.println("doc " + rawDocPathName);
         return rawDocPathName;
     }
@@ -220,32 +295,97 @@ public class ParseAnnotation {
         }
     }
 
+    /**
+     * OUTPUT DIFFERENCES IN ANNOTATION
+     *
+     * @param agreement
+     * @param outputDocPathName
+     * @param outputDocPathName_telicity
+     */
+    public void writeDifferences(AgreementForAnnotations agreement, String outputDocPathName, String outputDocPathName_telicity) {
+        //empty output file
+        emptyFile(outputDocPathName);
+        emptyFile(outputDocPathName_telicity);
+
+        for (List<List<Annotation>> difference : agreement.getDifferences()) {
+            if (difference.isEmpty())
+                continue;
+            String document = difference.get(0).get(0).document;
+            String rawDocPathName = this.getRawTextname(document);
+            this.lookupLabels(difference, rawDocPathName, outputDocPathName);
+
+            List<List<Annotation>> differencesFiltered = difference.stream().filter(ParseAnnotation::telicityDifference)
+                    .collect(Collectors.toList());
+
+            this.lookupLabels(differencesFiltered, rawDocPathName, outputDocPathName_telicity);
+        }
+    }
+
+    /**
+     * Output same annotations for telicity
+     *
+     * @param agreement
+     * @param outputDocPathName
+     * @param outputDocPathName_telicity
+     */
+    public void writeSameAnnotations(AgreementForAnnotations agreement, String outputDocPathName, String outputDocPathName_telicity) {
+        //empty output file
+        emptyFile(outputDocPathName);
+        emptyFile(outputDocPathName_telicity);
+
+        for (List<List<Annotation>> gold : agreement.getSameAnnotations()) {
+            if (gold.isEmpty())
+                continue;
+            String document = gold.get(0).get(0).document;
+            String rawDocPathName = this.getRawTextname(document);
+            this.lookupLabels(gold, rawDocPathName, outputDocPathName);
+
+            List<List<Annotation>> differencesFiltered = gold.stream().filter(ParseAnnotation::telicityDifference)
+                    .collect(Collectors.toList());
+
+            this.lookupLabels(differencesFiltered, rawDocPathName, outputDocPathName_telicity);
+        }
+    }
+
+    public void writeEvalVerbs(AgreementForAnnotations agreement, String outputDocPathName, String outputDynamic) {
+        //empty output file
+        emptyFile(outputDocPathName);
+        emptyFile(outputDynamic);
+
+        for (List<List<Annotation>> allLabels : agreement.getAllAnnotations()) {
+            if (allLabels.isEmpty())
+                continue;
+            String document = allLabels.get(0).get(0).document;
+            String rawDocPathName = this.getRawTextname(document);
+            this.lookupEvaluationVerbs(allLabels, rawDocPathName, outputDocPathName, outputDynamic);
+        }
+    }
+
+
     public static void main(String[] args) throws DocumentException,
             IOException {
         //TODO: to run the code on the other dataset, switch the commented and the uncommented filenames
         //#1a
 //        String projectName = "NewSEAspectTelicity_";
-//        String textFolderName = "raw_textfiles";
+//        String textFolderNameRaw = "raw_textfiles";
 
         //#1b
         String projectName = "Evaluation_AspectTelicity_";
-        String textFolderName = "Evaluation_raw_texts";
+        String textFolderNameRaw = "Evaluation_raw_texts";
 
-        //ENTER INPUT AND OUTPUT FILENAMES
+        //ENTER INPUT FILENAMES
         //#2a
-//        String outputDocPathName = "outputDifferences_all\\all3_alltexts.txt";
-//        String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
         //String xmlAnnotFolder = "annotations_alltexts_Melissa_ich";
 
         //#2b
-        String outputDocPathName = "evaluation_outputDifferences/E1_all.txt";
-        String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/E1_all.txt";
-//        String xmlAnnotFolder = "Evaluation_AT_Melissa_ich";
+        //String xmlAnnotFolder = "Evaluation_AT_Melissa_ich";
         String xmlAnnotFolder = "Evaluation_AT_all";
+
+        ParseAnnotation annotationParser = new ParseAnnotation(projectName, xmlAnnotFolder, textFolderNameRaw);
 
 
         //CONDUCT STUDY
-        Map<String, List<String>> allDocs = groupDocs(xmlAnnotFolder);
+        Map<String, List<String>> allDocs = annotationParser.groupDocs();
         Set<String> filenames = allDocs.keySet();
 
         if (filenames.size() == 0) {
@@ -267,24 +407,27 @@ public class ParseAnnotation {
         agreement.printCoincidenceMatrix();
 
 
-        // OUTPUT DIFFERENCES IN ANNOTATION
-        // empty output file
-        emptyFile(outputDocPathName);
-        emptyFile(outputDocPathName_telicity);
+        // OUTPUT DIFFERENCES
+        //String outputDocPathName = "outputDifferences_all\\all3_alltexts.txt";
+        //String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
+        String outputDocPathName = "evaluation_outputDifferences/test1.txt";
+        String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/test2.txt";
 
-        for (List<List<Annotation>> difference : agreement.getDifferences()) {
-            if (difference.isEmpty())
-                continue;
-            String document = difference.get(0).get(0).document;
-            String rawDocPathName = getRawTextname(document, xmlAnnotFolder, projectName,
-                    textFolderName);
-            lookupLabels(difference, rawDocPathName, outputDocPathName);
+        //annotationParser.writeDifferences(agreement, outputDocPathName, outputDocPathName_telicity);
 
-            List<List<Annotation>> differencesFiltered = difference.stream().filter(ParseAnnotation::telicityDifference)
-                    .collect(Collectors.toList());
+        // OUTPUT GOLD
+        //TODO: warum nur 1 document?
+//        String outputDocPathName_G = "ComparisonEvaluationVerbs/test1.txt";
+//        String outputDocPathName_telicity_G = "ComparisonEvaluationVerbs/test2.txt";
+//        annotationParser.writeSameAnnotations(agreement, outputDocPathName_G, outputDocPathName_telicity_G);
 
-            lookupLabels(differencesFiltered, rawDocPathName, outputDocPathName_telicity);
-        }
+
+        // EVALUATION COLLECTION VERBS
+        String verbsPath = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs.csv";
+        String dynamicPath = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_Dynamic.csv";
+        annotationParser.writeEvalVerbs(agreement, verbsPath, dynamicPath);
+
 
     }
+
 }
