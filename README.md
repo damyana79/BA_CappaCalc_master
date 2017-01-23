@@ -33,3 +33,13 @@ There are two main datasets, for which agreement is calculated:
 3. output differences: text files with differing annotations
  * evaluation_outputDifferences
  * evaluation_outputDifferences_telicity
+ 
+ 4. annotations and annotation differences:
+  * annotations of single annotators: annotator1, annotator2, annotator3
+  * items with differing telicity annotations: differences
+  * complete annotations, aspectual class and telicity: 
+    - for all verbs: evaluationAnnotationVerbs
+    - only for dynamic verbs: evaluationAnnotationVerbs_dynamic
+  * Silver Standard:
+    - silverStandard_human: items with corresponding annotations of all human annitators
+    - silverStandard_vallex: items with corresponding annotations of all human annitators and vallex labels
