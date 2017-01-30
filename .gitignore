@@ -2,6 +2,7 @@ ParseTexts/
 ParseTexts.iml
 *.iml
 
+Test/
 
 # Created by https://www.gitignore.io/api/intellij,eclipse,java,windows
 
