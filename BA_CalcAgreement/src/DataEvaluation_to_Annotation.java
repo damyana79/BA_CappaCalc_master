@@ -204,7 +204,7 @@ public class DataEvaluation_to_Annotation {
                 String vallex = this.intercorpAspect.get(verb);
                 List<String> annotators = this.humansilver.get(verb);
                 //System.out.println(annotators);
-                System.out.println("an " + annotators);
+                //System.out.println("an " + annotators);
                 annotators.add(vallex);
                 //System.out.println("+v" +annotators);
                 if (checkLabelsSame(annotators)) {
