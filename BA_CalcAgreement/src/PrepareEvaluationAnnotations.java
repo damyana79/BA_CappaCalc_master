@@ -32,15 +32,19 @@ public class PrepareEvaluationAnnotations {
                 String telicity2 = nextLine[5].trim();
                 String telicity3 = nextLine[6].trim();
 
-                if (aspect1.equals("dynamic")) {
+                if (aspect1.equals("dynamic") || aspect1.equals("dummy_a")) {
                     annotator1.add(new String[]{verb, telicity1});
                 }
-                if (aspect2.equals("dynamic")) {
+                if (aspect2.equals("dynamic") || aspect2.equals("dummy_a")) {
                     annotator2.add(new String[]{verb, telicity2});
                 }
-                if (aspect3.equals("dynamic")) {
+                if (aspect3.equals("dynamic") || aspect3.equals("dummy_a")) {
                     annotator3.add(new String[]{verb, telicity3});
                 }
+//                annotator1.add(new String[]{verb, telicity1});
+//                annotator2.add(new String[]{verb, telicity2});
+//                annotator3.add(new String[]{verb, telicity3});
+
             }
             writeSingleAnnotators(file1, annotator1);
             writeSingleAnnotators(file2, annotator2);
@@ -80,10 +84,10 @@ public class PrepareEvaluationAnnotations {
     }
 
     public static void main(String[] args) {
-        String fileAll = "EvaluationVerbs/evaluationAnnotationVerbs.csv";
-        String annotator1 = "EvaluationVerbs/annotator1.csv";
-        String annotator2 = "EvaluationVerbs/annotator2.csv";
-        String annotator3 = "EvaluationVerbs/annotator3.csv";
+        String fileAll = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_2.csv";
+        String annotator1 = "ComparisonEvaluationVerbs/annotator1_2.csv";
+        String annotator2 = "ComparisonEvaluationVerbs/annotator2_2.csv";
+        String annotator3 = "ComparisonEvaluationVerbs/annotator3_2.csv";
 
         getSingleAnnotators(fileAll, annotator1, annotator2, annotator3);
 

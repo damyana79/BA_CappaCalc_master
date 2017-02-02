@@ -50,9 +50,9 @@ public class AgreementForAnnotations {
      */
     public void addDocument(String documentName,
                             ArrayList<HashMap<Integer, Annotation>> parsedAnnotations) {
-        List<List<Annotation>> differencesProDocument = new ArrayList<List<Annotation>>();
-        List<List<Annotation>> goldProDocument = new ArrayList<List<Annotation>>();
-        List<List<Annotation>> all = new ArrayList<List<Annotation>>();
+        List<List<Annotation>> differencesProDocument = new ArrayList<>();
+        List<List<Annotation>> goldProDocument = new ArrayList<>();
+        List<List<Annotation>> all = new ArrayList<>();
 
         Set<Integer> span_id_keys = parsedAnnotations.get(0).keySet();
         for (Integer span_id_key : span_id_keys) {

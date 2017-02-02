@@ -259,9 +259,10 @@ public class ParseAnnotation {
         }
     }
 
+    //changed schecker.size ans checker.contains to accomodate "dummy_a";
     public boolean checkOnlyDynamic(List<String> aspectList) {
         HashSet<String> checker = new HashSet<>(aspectList);
-        return (checker.size() == 1 && checker.contains("dynamic"));
+        return (checker.size() >= 1 && !checker.contains("stative"));
     }
 
 
@@ -410,8 +411,8 @@ public class ParseAnnotation {
         // OUTPUT DIFFERENCES
         //String outputDocPathName = "outputDifferences_all\\all3_alltexts.txt";
         //String outputDocPathName_telicity = "outputDifferences_telicity\\all3_alltexts_telicity.txt";
-        String outputDocPathName = "evaluation_outputDifferences/test1.txt";
-        String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/test2.txt";
+        //String outputDocPathName = "evaluation_outputDifferences/test1.txt";
+        //String outputDocPathName_telicity = "evaluation_outputDifferences_telicity/test2.txt";
 
         //annotationParser.writeDifferences(agreement, outputDocPathName, outputDocPathName_telicity);
 
@@ -423,8 +424,8 @@ public class ParseAnnotation {
 
 
         // EVALUATION COLLECTION VERBS
-        String verbsPath = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs.csv";
-        String dynamicPath = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_Dynamic.csv";
+        String verbsPath = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_2.csv";
+        String dynamicPath = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_Dynamic_2.csv";
         annotationParser.writeEvalVerbs(agreement, verbsPath, dynamicPath);
 
 

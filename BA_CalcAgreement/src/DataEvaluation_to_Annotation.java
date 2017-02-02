@@ -73,7 +73,7 @@ public class DataEvaluation_to_Annotation {
                 String a3 = line[3].trim();
                 List<String> annotations = new ArrayList(Arrays.asList(a1, a2, a3));
                 List<String> silverAnnotations = new ArrayList<>(Arrays.asList(a1, a2, a3));
-                if (!annotations.contains("dummy_t")) {
+                if (!annotations.contains("dummy_t") && !annotations.contains("X_atelic")) {
                     this.annotatedDynamics.put(verb, annotations);
                 }
                 if (checkLabelsSame(annotations)) {
@@ -110,7 +110,7 @@ public class DataEvaluation_to_Annotation {
                 String verb = line[0].trim();
                 String a1 = line[1].trim();
                 ArrayList<String> annotations = new ArrayList(Arrays.asList(a1));
-                if (!annotations.contains("dummy_t")) {
+                if (!annotations.contains("dummy_t") || !annotations.contains("X_atelic")) {
                     this.annotatedDynamics.put(verb, annotations);
                 }
             }
@@ -231,15 +231,15 @@ public class DataEvaluation_to_Annotation {
         String intercorpVerbsFile = "intercorpVerbAspect/verbKeyAspect.csv";
         DataEvaluation_to_Annotation gatheredAnnotation = new DataEvaluation_to_Annotation();
         gatheredAnnotation.readIntercorpVerbAspect(intercorpVerbsFile);
-        String allAnnotations = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_Dynamic.csv";
-        String silverStandard_human = "ComparisonEvaluationVerbs/silverStandard_human.csv";
-        String differences = "ComparisonEvaluationVerbs/differences.csv";
+        String allAnnotations = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_Dynamic_2.csv";
+        String silverStandard_human = "ComparisonEvaluationVerbs/silverStandard_human_2.csv";
+        String differences = "ComparisonEvaluationVerbs/differences_2.csv";
 
         gatheredAnnotation.readAllAnnotatedDynamics(allAnnotations, silverStandard_human, differences);
 
         gatheredAnnotation.getAllAgreementMeasures(gatheredAnnotation.getAnnotationStudy());
 
-        String silverStandard_valex = "ComparisonEvaluationVerbs/silverStandard_vallex.csv";
+        String silverStandard_valex = "ComparisonEvaluationVerbs/silverStandard_vallex_2.csv";
         gatheredAnnotation.writeSilverVallex(silverStandard_valex);
 
         // SINGLE ANNOTATOR + VALLEXINTERCORP
