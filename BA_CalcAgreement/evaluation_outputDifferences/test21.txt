@@ -2687,7 +2687,7 @@ After two minutes Ford decided it was time something happened.
 [14064, 14071, C:\Users\Dana\Desktop\export_Evaluation_AspectTelicity_last\Christine_Melissa\Evaluation_AspectTelicity_selected_1_10_peatesom@tcd.ie.xml, Situation Entity, stative, null]
 
 refer
-Very often, of course, I just have to refer them to him, when it 's a question of a foreign document or something of that kind.
+Very often, of course, I just have to refer them to him, when it 's a question of a foreign xmlDocumentFilename or something of that kind.
 [12530, 12535, C:\Users\Dana\Desktop\export_Evaluation_AspectTelicity_last\Christine_Melissa\Evaluation_AspectTelicity_selected_1_10_bocionek@coli.uni-saarland.de.xml, Situation Entity, dynamic, telic]
 [12530, 12535, C:\Users\Dana\Desktop\export_Evaluation_AspectTelicity_last\Christine_Melissa\Evaluation_AspectTelicity_selected_1_10_peatesom@tcd.ie.xml, Situation Entity, dynamic, atelic]
 

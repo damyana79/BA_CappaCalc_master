@@ -32,7 +32,7 @@ public class DataEvaluation_to_Annotation {
         this.humansilver = new HashMap<>();
     }
 
-    //TODO:
+
     public void readIntercorpVerbAspect(String filename) {
         Path path = Paths.get(filename);
         try (BufferedReader bufferedReader = Files.newBufferedReader(path);
@@ -79,9 +79,9 @@ public class DataEvaluation_to_Annotation {
                 if (checkLabelsSame(annotations)) {
                     //System.out.println(annotations);
                     this.humansilver.put(verb, silverAnnotations);
-                    writeSilverStandard(silverStandard_human, verb, annotations);
+                    //writeSilverStandard(silverStandard_human, verb, annotations);
                 } else {
-                    writeDifferences(differences, verb, annotations);
+                    //writeDifferences(differences, verb, annotations);
                 }
 
                 //if I also wanted to detect missing values
@@ -89,6 +89,44 @@ public class DataEvaluation_to_Annotation {
             }
             System.out.println(this.humansilver);
             System.out.println(this.humansilver.values().stream().filter(a -> a.contains("telic")).count());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // February 2017 function, skip one annotator for A&B + Vallex et al
+    public void readAllAnnotatedDynamics_Pairs(String filename, String silverStandard_human, String differences, int skippable) {
+        PrepareEvaluationAnnotations.emptyFile(silverStandard_human);
+        PrepareEvaluationAnnotations.emptyFile(differences);
+        Path path = Paths.get(filename);
+        try (BufferedReader br = Files.newBufferedReader(path);
+             CSVReader csv = new CSVReader(br)) {
+            String[] line;
+            while ((line = csv.readNext()) != null) {
+                String verb = line[0].trim();
+                String a1 = line[1].trim();
+                String a2 = line[2].trim();
+                String a3 = line[3].trim();
+                List<String> annotations = new ArrayList(Arrays.asList(a1, a2, a3));
+                //List<String> silverAnnotations = new ArrayList<>(Arrays.asList(a1, a2, a3));
+                if (!annotations.contains("dummy_t") && !annotations.contains("X_atelic")) {
+                    // skip annotator here!
+                    annotations.remove(skippable);
+                    this.annotatedDynamics.put(verb, annotations);
+                }
+                //if (checkLabelsSame(annotations)) {
+                //System.out.println(annotations);
+                // this.humansilver.put(verb, silverAnnotations);
+                //writeSilverStandard(silverStandard_human, verb, annotations);
+                //} else {
+                //writeDifferences(differences, verb, annotations);
+                //}
+
+                //if I also wanted to detect missing values
+                //this.annotatedDynamics.put(verb, annotations);
+            }
+            //System.out.println(this.humansilver);
+            //System.out.println(this.humansilver.values().stream().filter(a -> a.contains("telic")).count());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,6 +167,21 @@ public class DataEvaluation_to_Annotation {
             System.err.println(key);
             List<String> item = annotatedDynamics.get(key);
             item.add(this.intercorpAspect.get(key));
+            telicityStudy.addItem(item.toArray());
+        }
+        return telicityStudy;
+    }
+
+    //only the annotations of annotators A B C without vallex
+    public CodingAnnotationStudy getAnnotationStudy_humansABC() {
+        Set<String> verbKeys = this.annotatedDynamics.keySet();
+        int numberAnnotators = this.annotatedDynamics.values().iterator().next().size();
+        System.out.println(numberAnnotators);
+        CodingAnnotationStudy telicityStudy = new CodingAnnotationStudy(numberAnnotators);
+        for (String key : verbKeys) {
+            System.err.println(key);
+            List<String> item = annotatedDynamics.get(key);
+            //item.add(this.intercorpAspect.get(key));
             telicityStudy.addItem(item.toArray());
         }
         return telicityStudy;
@@ -233,17 +286,27 @@ public class DataEvaluation_to_Annotation {
         DataEvaluation_to_Annotation gatheredAnnotation = new DataEvaluation_to_Annotation();
         gatheredAnnotation.readIntercorpVerbAspect(intercorpVerbsFile);
         String allAnnotations = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_Dynamic_2.csv";
-        String silverStandard_human = "ComparisonEvaluationVerbs/silverStandard_human_2.csv";
-        String differences = "ComparisonEvaluationVerbs/differences_2.csv";
+        String silverStandard_human = "ComparisonEvaluationVerbs/silverStandard_human_2ABC.csv";
+        String differences = "ComparisonEvaluationVerbs/differences_2ABC.csv";
 
-        gatheredAnnotation.readAllAnnotatedDynamics(allAnnotations, silverStandard_human, differences);
+        //original
+        //gatheredAnnotation.readAllAnnotatedDynamics(allAnnotations, silverStandard_human, differences);
+        // hacked february, skip 1 annotator to get pairs
+        gatheredAnnotation.readAllAnnotatedDynamics_Pairs(allAnnotations, silverStandard_human, differences, 0);
 
         gatheredAnnotation.getAllAgreementMeasures(gatheredAnnotation.getAnnotationStudy());
 
-        String silverStandard_valex = "ComparisonEvaluationVerbs/silverStandard_vallex_2.csv";
-        gatheredAnnotation.writeSilverVallex(silverStandard_valex);
 
-         //SINGLE ANNOTATOR + VALLEXINTERCORP
+        //february 2017 function for ABC agreement, instead of the fkt above ...gatheredAnnotation.getAnnotationStudy());
+        //gatheredAnnotation.getAllAgreementMeasures(gatheredAnnotation.getAnnotationStudy_humansABC());
+
+
+        //old functions not needed at the moment
+        //String silverStandard_valex = "ComparisonEvaluationVerbs/silverStandard_vallex_2.csv";
+        //gatheredAnnotation.writeSilverVallex(silverStandard_valex);
+
+
+        //SINGLE ANNOTATOR + VALLEXINTERCORP
 //        String intercorpVerbsFile = "intercorpVerbAspect/verbKeyAspect.csv";
 //        DataEvaluation_to_Annotation gatheredAnnotation = new DataEvaluation_to_Annotation();
 //        gatheredAnnotation.readIntercorpVerbAspect(intercorpVerbsFile);

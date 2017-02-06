@@ -73,6 +73,60 @@ public class PrepareEvaluationAnnotations {
 
     }
 
+    public static void getPairAnnotators(String input, String file12, String file23, String file31) {
+        Path path = Paths.get(input);
+        ArrayList<String[]> annotator12 = new ArrayList<>();
+        ArrayList<String[]> annotator23 = new ArrayList<>();
+        ArrayList<String[]> annotator31 = new ArrayList<>();
+        try (BufferedReader br = Files.newBufferedReader(path);
+             CSVReader csvReader = new CSVReader(br)) {
+            String[] nextLine;
+            while ((nextLine = csvReader.readNext()) != null) {
+                String verb = nextLine[0].trim();
+                String aspect1 = nextLine[1].trim();
+                String aspect2 = nextLine[2].trim();
+                String aspect3 = nextLine[3].trim();
+                String telicity1 = nextLine[4].trim();
+                String telicity2 = nextLine[5].trim();
+                String telicity3 = nextLine[6].trim();
+
+                boolean A = aspect1.equals("dynamic") || aspect1.equals("dummy_a");
+                boolean B = aspect2.equals("dynamic") || aspect2.equals("dummy_a");
+                boolean C = aspect3.equals("dynamic") || aspect3.equals("dummy_a");
+
+                if (A && B) {
+                    annotator12.add(new String[]{verb, telicity1, telicity2});
+                }
+                if (B && C) {
+                    annotator23.add(new String[]{verb, telicity2, telicity3});
+                }
+                if (A && B) {
+                    annotator31.add(new String[]{verb, telicity3, telicity1});
+                }
+
+//                if (aspect1.equals("dynamic") || aspect1.equals("dummy_a")) {
+//                    annotator1.add(new String[]{verb, telicity1});
+//                }
+//                if (aspect2.equals("dynamic") || aspect2.equals("dummy_a")) {
+//                    annotator2.add(new String[]{verb, telicity2});
+//                }
+//                if (aspect3.equals("dynamic") || aspect3.equals("dummy_a")) {
+//                    annotator3.add(new String[]{verb, telicity3});
+//                }
+//                annotator1.add(new String[]{verb, telicity1});
+//                annotator2.add(new String[]{verb, telicity2});
+//                annotator3.add(new String[]{verb, telicity3});
+
+            }
+            writeSingleAnnotators(file12, annotator12);
+            writeSingleAnnotators(file23, annotator23);
+            writeSingleAnnotators(file31, annotator31);
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
     public static void emptyFile(String filename) {
         try {
             Files.deleteIfExists(Paths.get(filename));
@@ -85,11 +139,16 @@ public class PrepareEvaluationAnnotations {
 
     public static void main(String[] args) {
         String fileAll = "ComparisonEvaluationVerbs/evaluationAnnotationVerbs_2.csv";
-        String annotator1 = "ComparisonEvaluationVerbs/annotator1_2.csv";
-        String annotator2 = "ComparisonEvaluationVerbs/annotator2_2.csv";
-        String annotator3 = "ComparisonEvaluationVerbs/annotator3_2.csv";
+//        String annotator1 = "ComparisonEvaluationVerbs/annotator1_2.csv";
+//        String annotator2 = "ComparisonEvaluationVerbs/annotator2_2.csv";
+//        String annotator3 = "ComparisonEvaluationVerbs/annotator3_2.csv";
+//
+//        getSingleAnnotators(fileAll, annotator1, annotator2, annotator3);
 
-        getSingleAnnotators(fileAll, annotator1, annotator2, annotator3);
+        String annotator12 = "ComparisonEvaluationVerbs/annotator_1st2nd.csv";
+        String annotator23 = "ComparisonEvaluationVerbs/annotator_2nd3rd.csv";
+        String annotator31 = "ComparisonEvaluationVerbs/annotator_3rd1st.csv";
+        getPairAnnotators(fileAll, annotator12, annotator23, annotator31);
 
     }
 

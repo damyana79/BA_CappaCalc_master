@@ -1100,7 +1100,7 @@ They therefore adopt forms, patterns, models-those that are in fashion, that sui
 [1774, 1779, C:\Users\Dana\Desktop\export_Evaluation_AspectTelicity_last\Christine_Melissa\Evaluation_AspectTelicity_selected_1_10_peatesom@tcd.ie.xml, Situation Entity, dynamic, atelic]
 
 refer
-Very often, of course, I just have to refer them to him, when it 's a question of a foreign document or something of that kind.
+Very often, of course, I just have to refer them to him, when it 's a question of a foreign xmlDocumentFilename or something of that kind.
 [12530, 12535, C:\Users\Dana\Desktop\export_Evaluation_AspectTelicity_last\Christine_Melissa\Evaluation_AspectTelicity_selected_1_10_bocionek@coli.uni-saarland.de.xml, Situation Entity, dynamic, telic]
 [12530, 12535, C:\Users\Dana\Desktop\export_Evaluation_AspectTelicity_last\Christine_Melissa\Evaluation_AspectTelicity_selected_1_10_peatesom@tcd.ie.xml, Situation Entity, dynamic, atelic]
 

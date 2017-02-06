@@ -42,14 +42,13 @@ public class AgreementForAnnotations {
     }
 
     /**
-     * @param documentName , ArrayList <HashMap<spanId:AnnotationObject>>
-     *                     parsedAnnotations <- comes from getParsedAnnotations( String
-     *                     documentName, List<String> annotationFiles)
+     * parsedAnnotations <- comes from getParsedAnnotations( String
+     * documentName, List<String> annotationFiles)
+     *
      * @return void; builds annotObjectList[annotObject_1 - ..._n] and passes it
      * to addElement()
      */
-    public void addDocument(String documentName,
-                            ArrayList<HashMap<Integer, Annotation>> parsedAnnotations) {
+    public void addDocument(ArrayList<HashMap<Integer, Annotation>> parsedAnnotations) {
         List<List<Annotation>> differencesProDocument = new ArrayList<>();
         List<List<Annotation>> goldProDocument = new ArrayList<>();
         List<List<Annotation>> all = new ArrayList<>();
@@ -104,11 +103,19 @@ public class AgreementForAnnotations {
         if (!targetTypeAnnotations.contains(null)) {
             this.targetTypeAgreement.addItem(targetTypeAnnotations.toArray());
         }
-        if (!aspClassAnnotations.contains(null)) {
+        if (!aspClassAnnotations.contains(null) && !(aspClassAnnotations.size() < this.numberAnnotators)) {
             this.aspectClAgreement.addItem(aspClassAnnotations.toArray());
         }
-        if (!telicityAnnotations.contains(null)) {
+        //TODO: check what comes in
+        if (!telicityAnnotations.contains(null) && (telicityAnnotations.size() == this.numberAnnotators) && !(telicityAnnotations.contains("X_atelic"))) {
+            //TODO: why I get 2 more verbs???????
+            if (telicityAnnotations.contains("X_atelic")) {
+                System.out.println("HEEEEEEEEEEEEEEEEEERRRRRRRRRRREEEEEEEEEE");
+            }
             this.telicityAgreement.addItem(telicityAnnotations.toArray());
+            String telicityVerb = annotObjectsList.get(0).getVerb();
+            //print verbs in shell (err channel)and write in file
+            System.err.println(telicityVerb);
         }
     }
 
@@ -155,9 +162,11 @@ public class AgreementForAnnotations {
     public List<List<List<Annotation>>> getDifferences() {
         return differences;
     }
+
     public List<List<List<Annotation>>> getSameAnnotations() {
         return sameAnnotations;
     }
+
     public List<List<List<Annotation>>> getAllAnnotations() {
         return allAnnotations;
     }
