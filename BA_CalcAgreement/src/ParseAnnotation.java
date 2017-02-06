@@ -31,17 +31,15 @@ public class ParseAnnotation {
 
 
     /**
-     * @param documentName
      * @param annotationFiles
-     * @return output: AL[HM <spanId:AnnotationObject>] per document; input
+     * @return output: AL[HM <spanId:AnnotationObject>] per xmlDocumentFilename; input
      * provided through iteration over groupdocs(String folderpath)
      * @throws IOException
      * @throws DocumentException
      */
-    public static ArrayList<HashMap<Integer, Annotation>> getParsedAnnotations(
-            String documentName, List<String> annotationFiles)
+    public ArrayList<HashMap<Integer, Annotation>> getParsedAnnotations(List<String> annotationFiles)
             throws IOException, DocumentException {
-        ArrayList<HashMap<Integer, Annotation>> parsedAnnotations = new ArrayList<HashMap<Integer, Annotation>>();
+        ArrayList<HashMap<Integer, Annotation>> parsedAnnotations = new ArrayList<>();
         for (String filename : annotationFiles) {
             parsedAnnotations.add(parseFile(filename));
         }
@@ -54,16 +52,16 @@ public class ParseAnnotation {
      * @throws DocumentException
      * @throws IOException
      */
-    public static HashMap<Integer, Annotation> parseFile(String filename)
-            throws DocumentException, IOException {
-        HashMap<Integer, Annotation> annotationTable = new HashMap<Integer, Annotation>();
+    public HashMap<Integer, Annotation> parseFile(String filename) throws DocumentException, IOException {
+        HashMap<Integer, Annotation> annotationTable = new HashMap<>();
 
         File inputFile = new File(filename);
         SAXReader reader = new SAXReader();
         Document document = reader.read(inputFile);
 
-        List<Node> nodes = document
-                .selectNodes("/document/annotations/annotation");
+        AnnotationDocument annotationDocument = new AnnotationDocument(filename, this.projectName, this.textDocPathName);
+
+        List<Node> nodes = document.selectNodes("/document/annotations/annotation");
 
         for (Node node : nodes) {
             int start = Integer.parseInt(node.selectSingleNode("start")
@@ -84,7 +82,7 @@ public class ParseAnnotation {
                 } else
                     throw new IOException("illegal label name " + name);
             }
-            Annotation item = new Annotation(start, end, filename, targetType,
+            Annotation item = new Annotation(start, end, annotationDocument, targetType,
                     aspClass, telicity);
             annotationTable.put(start, item);
         }
@@ -161,7 +159,7 @@ public class ParseAnnotation {
         }
 
         for (List<Annotation> annotations : disagreementProDoc) {
-            // String docName = annotations.get(0).document;
+            // String docName = annotations.get(0).xmlDocumentFilename;
             int begin = annotations.get(0).begin;
             int end = annotations.get(0).end;
             String differentWord = text.substring(begin, end);
@@ -201,7 +199,7 @@ public class ParseAnnotation {
             return;
         }
         for (List<Annotation> annotations : annotationList) {
-            // String docName = annotations.get(0).document;
+            // String docName = annotations.get(0).xmlDocumentFilename;
             int begin = annotations.get(0).begin;
             int end = annotations.get(0).end;
             String verb = text.substring(begin, end);
@@ -274,16 +272,12 @@ public class ParseAnnotation {
 
     //TODO: remove hard coding
     public String getRawTextname(String documentName) {
-
-        //System.out.println(documentName + " " + xmlFolderName + " " + textFolderName);
         String rawName = documentName.replace(this.xmlFolderName + "\\"
                 + this.projectName, "");
         int underscore = rawName.lastIndexOf("_");
         rawName = rawName.substring(0, underscore);
 
-        String rawDocPathName = this.textDocPathName + "\\" + rawName + ".txt";
-        // System.out.println("doc " + rawDocPathName);
-        return rawDocPathName;
+        return this.textDocPathName + "\\" + rawName + ".txt";
     }
 
     public static void emptyFile(String filename) {
@@ -311,7 +305,7 @@ public class ParseAnnotation {
         for (List<List<Annotation>> difference : agreement.getDifferences()) {
             if (difference.isEmpty())
                 continue;
-            String document = difference.get(0).get(0).document;
+            String document = difference.get(0).get(0).annotationDocument.xmlDocumentFilename;
             String rawDocPathName = this.getRawTextname(document);
             this.lookupLabels(difference, rawDocPathName, outputDocPathName);
 
@@ -337,7 +331,7 @@ public class ParseAnnotation {
         for (List<List<Annotation>> gold : agreement.getSameAnnotations()) {
             if (gold.isEmpty())
                 continue;
-            String document = gold.get(0).get(0).document;
+            String document = gold.get(0).get(0).annotationDocument.xmlDocumentFilename;
             String rawDocPathName = this.getRawTextname(document);
             this.lookupLabels(gold, rawDocPathName, outputDocPathName);
 
@@ -356,15 +350,14 @@ public class ParseAnnotation {
         for (List<List<Annotation>> allLabels : agreement.getAllAnnotations()) {
             if (allLabels.isEmpty())
                 continue;
-            String document = allLabels.get(0).get(0).document;
+            String document = allLabels.get(0).get(0).annotationDocument.xmlDocumentFilename;
             String rawDocPathName = this.getRawTextname(document);
             this.lookupEvaluationVerbs(allLabels, rawDocPathName, outputDocPathName, outputDynamic);
         }
     }
 
 
-    public static void main(String[] args) throws DocumentException,
-            IOException {
+    public static void main(String[] args) throws DocumentException, IOException {
         //TODO: to run the code on the other dataset, switch the commented and the uncommented filenames
         //#1a
 //        String projectName = "NewSEAspectTelicity_";
@@ -390,18 +383,17 @@ public class ParseAnnotation {
         Set<String> filenames = allDocs.keySet();
 
         if (filenames.size() == 0) {
-            System.out.println("No documents found.");
+            System.err.println("No documents found.");
             return;
         }
         // TODO: is there a better way?
         int numberOfAnnotators = allDocs.values().iterator().next().size();
-        AgreementForAnnotations agreement = new AgreementForAnnotations(
-                numberOfAnnotators);
+        AgreementForAnnotations agreement = new AgreementForAnnotations(numberOfAnnotators);
 
         for (String doc : filenames) {
-            ArrayList<HashMap<Integer, Annotation>> parsedAnnotations = getParsedAnnotations(
-                    doc, allDocs.get(doc));
-            agreement.addDocument(doc, parsedAnnotations);
+            ArrayList<HashMap<Integer, Annotation>> parsedAnnotations = annotationParser.getParsedAnnotations(
+                    allDocs.get(doc));
+            agreement.addDocument(parsedAnnotations);
         }
         System.out.println(agreement);
 
@@ -417,7 +409,7 @@ public class ParseAnnotation {
         //annotationParser.writeDifferences(agreement, outputDocPathName, outputDocPathName_telicity);
 
         // OUTPUT GOLD
-        //TODO: warum nur 1 document?
+        //TODO: warum nur 1 xmlDocumentFilename?
 //        String outputDocPathName_G = "ComparisonEvaluationVerbs/test1.txt";
 //        String outputDocPathName_telicity_G = "ComparisonEvaluationVerbs/test2.txt";
 //        annotationParser.writeSameAnnotations(agreement, outputDocPathName_G, outputDocPathName_telicity_G);

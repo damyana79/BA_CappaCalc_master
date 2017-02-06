@@ -126,6 +126,7 @@ public class DataEvaluation_to_Annotation {
         System.out.println(numberAnnotators);
         CodingAnnotationStudy telicityStudy = new CodingAnnotationStudy(numberAnnotators);
         for (String key : verbKeys) {
+            System.err.println(key);
             List<String> item = annotatedDynamics.get(key);
             item.add(this.intercorpAspect.get(key));
             telicityStudy.addItem(item.toArray());
@@ -242,11 +243,11 @@ public class DataEvaluation_to_Annotation {
         String silverStandard_valex = "ComparisonEvaluationVerbs/silverStandard_vallex_2.csv";
         gatheredAnnotation.writeSilverVallex(silverStandard_valex);
 
-        // SINGLE ANNOTATOR + VALLEXINTERCORP
+         //SINGLE ANNOTATOR + VALLEXINTERCORP
 //        String intercorpVerbsFile = "intercorpVerbAspect/verbKeyAspect.csv";
 //        DataEvaluation_to_Annotation gatheredAnnotation = new DataEvaluation_to_Annotation();
 //        gatheredAnnotation.readIntercorpVerbAspect(intercorpVerbsFile);
-//        String allAnnotations = "ComparisonEvaluationVerbs/annotator3.csv";
+//        String allAnnotations = "ComparisonEvaluationVerbs/annotator3_2.csv";
 //        gatheredAnnotation.readSingleAnnotatedDynamics(allAnnotations);
 //
 //        gatheredAnnotation.getAllAgreementMeasures(gatheredAnnotation.getAnnotationStudy());
